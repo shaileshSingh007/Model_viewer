@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AR Model Gallery</title>
+    
+    <!-- Tailwind CSS for rapid UI styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Phosphor Icons for elegant UI icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Google Model Viewer component -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f3f4f6;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        /* Ensure the active model viewer takes up the full screen of the modal */
+        #main-viewer {
+            width: 100%;
+            height: 100%;
+            background-color: #e5e7eb;
+            --poster-color: transparent;
+        }
+
+        /* Hide default AR button to use our custom slotted one */
+        .ar-button-default {
+            display: none; 
+        }
+
+        /* Custom AR Button styling (Only visible on AR-capable mobile devices) */
+        #custom-ar-button {
+            background-color: #2563eb; /* Blue-600 */
+            color: white;
+            border-radius: 9999px;
+            border: none;
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 16px 32px;
+            font-weight: 700;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 50;
+        }
+
+        #custom-ar-button:active {
+            transform: translateX(-50%) scale(0.95);
+            background-color: #1d4ed8; /* Blue-700 */
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- HOME SCREEN: Grid of Models -->
+    <div id="home-screen" class="min-h-screen p-6 pb-20">
+        <header class="mb-8 mt-4 text-center">
+            <h1 class="text-3xl font-extrabold text-gray-900 mb-2">AR Gallery</h1>
+            <p class="text-gray-500 text-sm">Select a model to view in 3D and AR</p>
+        </header>
+
+        <!-- Grid Container -->
+        <div class="grid grid-cols-2 gap-4 max-w-md mx-auto">
+            
+            <!-- Model 1: Astronaut -->
+            <div onclick="openModel('Astronaut')" class="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 flex flex-col items-center justify-center cursor-pointer hover:shadow-md transition-shadow active:scale-95">
+                <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                    <img src="https://modelviewer.dev/shared-assets/models/Astronaut.webp" alt="Astronaut" class="w-20 h-20 object-contain drop-shadow-md">
+                </div>
+                <h2 class="font-bold text-gray-800 text-center">Space Suit</h2>
+                <p class="text-xs text-gray-400 mt-1">Character</p>
+            </div>
+
+            <!-- Model 2: Shoe -->
+            <div onclick="openModel('Shoe')" class="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 flex flex-col items-center justify-center cursor-pointer hover:shadow-md transition-shadow active:scale-95">
+                <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                    <img src="https://modelviewer.dev/shared-assets/models/Shoe.webp" alt="Nike Shoe" class="w-20 h-20 object-contain drop-shadow-md">
+                </div>
+                <h2 class="font-bold text-gray-800 text-center">Sneaker</h2>
+                <p class="text-xs text-gray-400 mt-1">Product</p>
+            </div>
+
+        </div>
+
+        <!-- Desktop Warning -->
+        <div class="mt-12 p-4 bg-blue-50 text-blue-800 rounded-2xl max-w-md mx-auto text-sm flex gap-3 items-start">
+            <i class="ph ph-info text-xl mt-0.5"></i>
+            <p><strong>Note on AR:</strong> The "Open in AR" button inside the viewer will automatically hide if you are on a Desktop PC. Open this page on a modern iOS or Android device to test AR.</p>
+        </div>
+    </div>
+
+
+    <!-- 3D VIEWER MODAL OVERLAY -->
+    <div id="viewer-modal" class="fixed inset-0 z-50 bg-gray-100 hidden flex-col">
+        
+        <!-- Top Action Bar (Close & Screenshot) -->
+        <div class="absolute top-0 left-0 w-full p-4 flex justify-between items-center z-40 pointer-events-none">
+            
+            <!-- Close Button -->
+            <button onclick="closeModel()" class="bg-white/90 backdrop-blur-md w-12 h-12 rounded-full shadow-md text-gray-700 flex items-center justify-center hover:bg-white active:scale-95 transition-all pointer-events-auto border border-gray-100">
+                <i class="ph ph-caret-left text-2xl"></i>
+            </button>
+            
+            <!-- Screenshot Button -->
+            <button id="screenshot-btn" class="bg-white/90 backdrop-blur-md w-12 h-12 rounded-full shadow-md text-gray-700 flex items-center justify-center hover:text-blue-600 hover:bg-white active:scale-95 transition-all pointer-events-auto border border-gray-100 group" aria-label="Take Screenshot">
+                <i class="ph ph-camera text-2xl group-hover:scale-110 transition-transform"></i>
+            </button>
+        </div>
+
+        <!-- 
+            Model Viewer Configuration:
+            - ar-modes: "scene-viewer" (Android preferred), "webxr" (Android fallback), "quick-look" (iOS native)
+        -->
+        <model-viewer 
+            id="main-viewer"
+            src=""
+            ios-src=""
+            alt="3D Model"
+            ar
+            ar-modes="scene-viewer webxr quick-look"
+            camera-controls
+            auto-rotate
+            rotation-per-second="30deg"
+            shadow-intensity="1.5"
+            shadow-softness="0.7"
+            environment-image="neutral"
+            exposure="1.0">
+            
+            <!-- Custom AR Button placed in the designated slot -->
+            <button slot="ar-button" id="custom-ar-button">
+                <i class="ph ph-bounding-box text-2xl"></i>
+                Open in AR
+            </button>
+        </model-viewer>
+    </div>
+
+    <!-- Custom Toast Message -->
+    <div id="toast-message" class="fixed top-20 left-1/2 transform -translate-x-1/2 -translate-y-8 opacity-0 transition-all duration-300 pointer-events-none z-[60]">
+        <div class="bg-gray-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm font-medium">
+            <i id="toast-icon" class="ph ph-check-circle text-green-400 text-lg"></i>
+            <span id="toast-text">Screenshot saved!</span>
+        </div>
+    </div>
+
+    <script>
+        // Model Data
+        const modelData = {
+            'Astronaut': {
+                glb: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
+                usdz: 'https://modelviewer.dev/shared-assets/models/Astronaut.usdz'
+            },
+            'Shoe': {
+                glb: 'https://modelviewer.dev/shared-assets/models/Shoe.glb',
+                usdz: 'https://modelviewer.dev/shared-assets/models/Shoe.usdz'
+            }
+        };
+
+        // Elements
+        const viewerModal = document.getElementById('viewer-modal');
+        const mainViewer = document.getElementById('main-viewer');
+        const screenshotBtn = document.getElementById('screenshot-btn');
+        
+        // Toast Elements
+        const toast = document.getElementById('toast-message');
+        const toastText = document.getElementById('toast-text');
+        const toastIcon = document.getElementById('toast-icon');
+        let toastTimeout;
+
+        // Function to open the 3D Modal
+        window.openModel = function(modelKey) {
+            const data = modelData[modelKey];
+            if(data) {
+                // Set sources
+                mainViewer.src = data.glb;
+                mainViewer.iosSrc = data.usdz;
+                
+                // Show modal
+                viewerModal.classList.remove('hidden');
+                viewerModal.classList.add('flex');
+            }
+        };
+
+        // Function to close the 3D Modal
+        window.closeModel = function() {
+            viewerModal.classList.remove('flex');
+            viewerModal.classList.add('hidden');
+            
+            // Clear source to stop rendering in background
+            mainViewer.src = '';
+            mainViewer.iosSrc = '';
+        };
+
+        // Custom Toast Notification Function
+        const showToast = (message, isError = false) => {
+            toastText.textContent = message;
+            
+            if (isError) {
+                toastIcon.className = 'ph ph-warning-circle text-red-400 text-lg';
+            } else {
+                toastIcon.className = 'ph ph-check-circle text-green-400 text-lg';
+            }
+
+            toast.classList.remove('opacity-0', '-translate-y-8');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-8');
+            }, 3000);
+        };
+
+        // Stop auto-rotation when the user interacts with the model
+        mainViewer.addEventListener('camera-change', (event) => {
+            if (event.detail.source === 'user-interaction') {
+                mainViewer.removeAttribute('auto-rotate');
+            }
+        });
+
+        // Screenshot Functionality
+        screenshotBtn.addEventListener('click', async () => {
+            try {
+                const wasAutoRotating = mainViewer.hasAttribute('auto-rotate');
+                if (wasAutoRotating) mainViewer.removeAttribute('auto-rotate');
+
+                // Visual flash effect
+                const flash = document.createElement('div');
+                flash.className = 'fixed inset-0 bg-white z-[100] transition-opacity duration-300 opacity-100 pointer-events-none';
+                document.body.appendChild(flash);
+                
+                // Get image blob
+                const blob = await mainViewer.toBlob({ idealAspect: true });
+                if (!blob) throw new Error("Failed to generate image data");
+
+                // Download image
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `3D-Capture-${new Date().getTime()}.png`;
+                
+                document.body.appendChild(link);
+                link.click();
+                
+                // Cleanup
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                // Remove flash
+                requestAnimationFrame(() => {
+                    flash.classList.remove('opacity-100');
+                    flash.classList.add('opacity-0');
+                    setTimeout(() => document.body.removeChild(flash), 300);
+                });
+                
+                showToast("Screenshot saved to device!");
+                
+                if (wasAutoRotating) mainViewer.setAttribute('auto-rotate', 'true');
+
+            } catch (error) {
+                console.error('Screenshot failed:', error);
+                showToast("Couldn't capture screenshot", true);
+            }
+        });
+    </script>
+</body>
+</html>
