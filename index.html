@@ -1,281 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AR Model Gallery</title>
-    
-    <!-- Tailwind CSS for rapid UI styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Phosphor Icons for elegant UI icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
-    <!-- Google Model Viewer component -->
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="mobile-web-app-capable" content="yes" />
+<title>Ed-Games Hub · 3D Animals</title>
 
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #f3f4f6;
-            font-family: system-ui, -apple-system, sans-serif;
-        }
+<!-- model-viewer (works on Android Scene Viewer + iOS Quick Look) -->
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 
-        /* Ensure the active model viewer takes up the full screen of the modal */
-        #main-viewer {
-            width: 100%;
-            height: 100%;
-            background-color: #e5e7eb;
-            --poster-color: transparent;
-        }
+<style>
+  :root{
+    --cream:#faf8ec;
+    --orange:#e8ac4e;
+    --ink:#33421f;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:"Helvetica Neue",Helvetica,Arial,"Segoe UI",sans-serif;
+    background:var(--orange);
+    color:var(--ink);
+    overflow-x:hidden;
+  }
 
-        /* Hide default AR button to use our custom slotted one */
-        .ar-button-default {
-            display: none; 
-        }
+  /* ---------- Header ---------- */
+  .topbar{
+    background:var(--cream);
+    padding:14px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .logo-tcs{
+    font-weight:800;
+    font-size:clamp(22px,6vw,34px);
+    letter-spacing:-1px;
+    color:#111;
+    line-height:1;
+  }
+  .logo-tcs span{position:relative;}
+  .logo-tcs .o{
+    display:inline-block;
+    width:.62em;height:.62em;
+    border:.12em solid #111;
+    border-radius:50%;
+    position:relative;
+    top:.05em;
+  }
+  .logo-tcs .o::before{
+    content:"";position:absolute;left:50%;top:-.18em;
+    transform:translateX(-50%);
+    width:.12em;height:.3em;background:#111;border-radius:2px;
+  }
+  .logo-hub{text-align:right;line-height:1.05;}
+  .logo-hub b{
+    display:block;
+    font-size:clamp(20px,5.5vw,32px);
+    letter-spacing:-1px;
+    color:#111;
+    font-weight:800;
+  }
+  .logo-hub small{
+    display:block;
+    font-size:clamp(8px,2.2vw,12px);
+    color:#222;
+    letter-spacing:.2px;
+    margin-top:2px;
+  }
 
-        /* Custom AR Button styling (Only visible on AR-capable mobile devices) */
-        #custom-ar-button {
-            background-color: #2563eb; /* Blue-600 */
-            color: white;
-            border-radius: 9999px;
-            border: none;
-            position: absolute;
-            bottom: 32px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 16px 32px;
-            font-weight: 700;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            cursor: pointer;
-            transition: all 0.2s;
-            z-index: 50;
-        }
+  .banner{
+    background:#000;
+    color:#fff;
+    padding:26px 20px;
+    font-size:clamp(24px,7vw,42px);
+    font-weight:400;
+    letter-spacing:.5px;
+  }
 
-        #custom-ar-button:active {
-            transform: translateX(-50%) scale(0.95);
-            background-color: #1d4ed8; /* Blue-700 */
-        }
-    </style>
+  /* ---------- Grid ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:26px 22px;
+    padding:34px 18px 90px;
+    max-width:1200px;
+    margin:0 auto;
+  }
+  @media(min-width:760px){ .grid{grid-template-columns:repeat(3,minmax(0,1fr));} }
+  @media(min-width:1080px){ .grid{grid-template-columns:repeat(4,minmax(0,1fr));} }
+
+  .card{
+    background:var(--card);
+    padding:14px 14px 10px;
+    border:none;
+    cursor:pointer;
+    box-shadow:6px 10px 18px rgba(0,0,0,.28);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    transition:transform .18s ease, box-shadow .18s ease;
+    font-family:inherit;
+  }
+  .card:nth-child(odd){transform:rotate(-1.4deg);}
+  .card:nth-child(even){transform:rotate(1.2deg);}
+  .card:active{transform:scale(.97) rotate(0deg);}
+  @media(hover:hover){
+    .card:hover{transform:translateY(-4px) rotate(0deg);box-shadow:8px 14px 26px rgba(0,0,0,.35);}
+  }
+
+  .thumb{
+    width:100%;
+    aspect-ratio:1/1;
+    background:radial-gradient(circle at 50% 40%, #8b8b90 0%, #6e6e74 60%, #5c5c62 100%);
+    display:block;
+    overflow:hidden;
+    position:relative;
+  }
+  .thumb model-viewer{
+    width:100%;height:100%;
+    --poster-color:transparent;
+    pointer-events:none;
+    background:transparent;
+  }
+  .thumb .spin{
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:12px;letter-spacing:1px;opacity:.8;
+  }
+  .card h3{
+    margin:14px 4px 12px;
+    font-size:clamp(18px,4.6vw,24px);
+    font-weight:800;
+    text-align:center;
+    color:var(--ink);
+    word-break:break-word;
+    line-height:1.25;
+  }
+
+  /* ---------- Fullscreen viewer ---------- */
+  .viewer{
+    position:fixed;
+    inset:0;
+    background:#101216;
+    z-index:9999;
+    display:none;
+  }
+  .viewer.open{display:block;}
+  .viewer model-viewer{
+    width:100%;
+    height:100%;
+    background:linear-gradient(180deg,#20242c 0%,#0d0f13 100%);
+    --progress-bar-color:#e8ac4e;
+  }
+
+  .close-btn{
+    position:absolute;
+    top:calc(env(safe-area-inset-top,0px) + 14px);
+    right:14px;
+    width:48px;height:48px;
+    border-radius:50%;
+    border:none;
+    background:rgba(255,255,255,.92);
+    color:#111;
+    font-size:26px;
+    line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    box-shadow:0 4px 14px rgba(0,0,0,.4);
+    z-index:5;
+  }
+  .close-btn:active{transform:scale(.92);}
+
+  .title-pill{
+    position:absolute;
+    top:calc(env(safe-area-inset-top,0px) + 20px);
+    left:16px;
+    background:rgba(0,0,0,.55);
+    color:#fff;
+    padding:8px 16px;
+    border-radius:100px;
+    font-size:16px;
+    font-weight:700;
+    backdrop-filter:blur(6px);
+    z-index:5;
+    max-width:60%;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+
+  .ar-btn{
+    position:absolute;
+    bottom:calc(env(safe-area-inset-bottom,0px) + 26px);
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--orange);
+    color:#231a06;
+    border:none;
+    padding:14px 26px;
+    border-radius:100px;
+    font-size:17px;
+    font-weight:800;
+    display:flex;align-items:center;gap:10px;
+    box-shadow:0 8px 22px rgba(0,0,0,.45);
+    cursor:pointer;
+    z-index:5;
+    white-space:nowrap;
+  }
+  .ar-btn:active{transform:translateX(-50%) scale(.95);}
+  .ar-btn svg{width:22px;height:22px;}
+  .ar-btn[hidden]{display:none;}
+
+  .hint{
+    position:absolute;
+    bottom:calc(env(safe-area-inset-bottom,0px) + 92px);
+    left:0;right:0;
+    text-align:center;
+    color:rgba(255,255,255,.7);
+    font-size:13px;
+    z-index:4;
+    pointer-events:none;
+  }
+
+  .chat-fab{
+    position:fixed;
+    right:16px;
+    bottom:calc(env(safe-area-inset-bottom,0px) + 16px);
+    width:62px;height:62px;
+    border-radius:50%;
+    background:#2f6fd0;
+    border:none;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 16px rgba(0,0,0,.35);
+    z-index:50;
+    cursor:pointer;
+  }
+  .chat-fab svg{width:30px;height:30px;fill:#fff;}
+  .viewer.open ~ .chat-fab{display:none;}
+</style>
 </head>
-<body class="text-gray-800">
+<body>
 
-    <!-- HOME SCREEN: Grid of Models -->
-    <div id="home-screen" class="min-h-screen p-6 pb-20">
-        <header class="mb-8 mt-4 text-center">
-            <h1 class="text-3xl font-extrabold text-gray-900 mb-2">AR Gallery</h1>
-            <p class="text-gray-500 text-sm">Select a model to view in 3D and AR</p>
-        </header>
+<header class="topbar">
+  <div class="logo-tcs">tcs i<span class="o"></span>N</div>
+  <div class="logo-hub">
+    <b>Ed-Games Hub</b>
+    <small>Built to engage learners at home and school</small>
+  </div>
+</header>
 
-        <!-- Grid Container -->
-        <div class="grid grid-cols-2 gap-4 max-w-md mx-auto">
-            
-            <!-- Model 1: Astronaut -->
-            <div onclick="openModel('Astronaut')" class="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 flex flex-col items-center justify-center cursor-pointer hover:shadow-md transition-shadow active:scale-95">
-                <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-3">
-                    <img src="https://modelviewer.dev/shared-assets/models/Astronaut.webp" alt="Astronaut" class="w-20 h-20 object-contain drop-shadow-md">
-                </div>
-                <h2 class="font-bold text-gray-800 text-center">Space Suit</h2>
-                <p class="text-xs text-gray-400 mt-1">Character</p>
-            </div>
+<div class="banner">Select to view and click pictures.</div>
 
-            <!-- Model 2: Shoe -->
-            <div onclick="openModel('Shoe')" class="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 flex flex-col items-center justify-center cursor-pointer hover:shadow-md transition-shadow active:scale-95">
-                <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-3">
-                    <img src="https://modelviewer.dev/shared-assets/models/Shoe.webp" alt="Nike Shoe" class="w-20 h-20 object-contain drop-shadow-md">
-                </div>
-                <h2 class="font-bold text-gray-800 text-center">Sneaker</h2>
-                <p class="text-xs text-gray-400 mt-1">Product</p>
-            </div>
+<main class="grid" id="grid"></main>
 
-        </div>
+<!-- Fullscreen AR / 3D viewer -->
+<div class="viewer" id="viewer">
+  <div class="title-pill" id="viewerTitle">Model</div>
+  <button class="close-btn" id="closeBtn" aria-label="Close viewer">✕</button>
+  <div class="hint">Drag to rotate · Pinch to zoom</div>
+  <model-viewer
+      id="mv"
+      alt="3D model"
+      camera-controls
+      touch-action="none"
+      auto-rotate
+      auto-rotate-delay="1500"
+      shadow-intensity="1"
+      exposure="1"
+      environment-image="neutral"
+      ar
+      ar-modes="webxr scene-viewer quick-look"
+      ar-scale="auto"
+      ar-placement="floor"
+      loading="eager"
+      reveal="auto">
+    <button class="ar-btn" slot="ar-button" id="arBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/>
+        <path d="M12 7.5 16.5 10v4.5L12 17l-4.5-2.5V10L12 7.5Z"/>
+        <path d="M12 12.2 16.5 10M12 12.2 7.5 10M12 12.2V17"/>
+      </svg>
+      View in AR
+    </button>
+  </model-viewer>
+</div>
 
-        <!-- Desktop Warning -->
-        <div class="mt-12 p-4 bg-blue-50 text-blue-800 rounded-2xl max-w-md mx-auto text-sm flex gap-3 items-start">
-            <i class="ph ph-info text-xl mt-0.5"></i>
-            <p><strong>Note on AR:</strong> The "Open in AR" button inside the viewer will automatically hide if you are on a Desktop PC. Open this page on a modern iOS or Android device to test AR.</p>
-        </div>
+<button class="chat-fab" aria-label="Chat">
+  <svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Zm-3 10H7v-2h10v2Zm0-4H7V6h10v2Z"/></svg>
+</button>
+
+<script>
+/* =========================================================
+   1) MODEL LIST  —  edit this array to match your /model folder
+   file : filename inside the "model" folder
+   name : label shown on the card
+   ios  : (optional) matching .usdz file for iOS Quick Look.
+          If omitted, model-viewer auto-generates USDZ from the GLB.
+   ========================================================= */
+const MODELS = [
+  { file:"models/WhiteRhinoceros.glb", name:"WhiteRhinoceros" },
+  { file:"models/Giraffe.glb",         name:"Giraffe" },
+  { file:"models/Hippopotamus.glb",    name:"Hippopotamus" },
+  { file:"models/Wildebeest.glb",      name:"Wildebeest" },
+  { file:"models/Elephant.glb",        name:"Elephant" },
+  { file:"models/Zebra.glb",           name:"Zebra" },
+  { file:"models/Lion.glb",            name:"Lion" },
+  { file:"models/Buffalo.glb",         name:"Buffalo" }
+];
+
+const FOLDER = "model/";     // folder that contains the .glb files
+
+/* ---------- Build the grid ---------- */
+const grid = document.getElementById("grid");
+
+MODELS.forEach((m, i) => {
+  const src = FOLDER + m.file;
+  const card = document.createElement("button");
+  card.className = "card";
+  card.type = "button";
+  card.innerHTML = `
+    <div class="thumb">
+      <div class="spin">LOADING…</div>
+      <model-viewer
+        src="${src}"
+        alt="${m.name}"
+        loading="lazy"
+        reveal="auto"
+        interaction-prompt="none"
+        disable-zoom
+        disable-pan
+        disable-tap
+        camera-orbit="25deg 78deg auto"
+        shadow-intensity="0.9"
+        exposure="1"
+        environment-image="neutral"></model-viewer>
     </div>
+    <h3>${m.name}</h3>`;
+  const tmv = card.querySelector("model-viewer");
+  const spin = card.querySelector(".spin");
+  tmv.addEventListener("load", () => spin.remove());
+  tmv.addEventListener("error", () => spin.textContent = "3D");
+  card.addEventListener("click", () => openViewer(m));
+  grid.appendChild(card);
+});
 
+/* ---------- Fullscreen viewer ---------- */
+const viewer      = document.getElementById("viewer");
+const mv          = document.getElementById("mv");
+const viewerTitle = document.getElementById("viewerTitle");
+const closeBtn    = document.getElementById("closeBtn");
+const arBtn       = document.getElementById("arBtn");
 
-    <!-- 3D VIEWER MODAL OVERLAY -->
-    <div id="viewer-modal" class="fixed inset-0 z-50 bg-gray-100 hidden flex-col">
-        
-        <!-- Top Action Bar (Close & Screenshot) -->
-        <div class="absolute top-0 left-0 w-full p-4 flex justify-between items-center z-40 pointer-events-none">
-            
-            <!-- Close Button -->
-            <button onclick="closeModel()" class="bg-white/90 backdrop-blur-md w-12 h-12 rounded-full shadow-md text-gray-700 flex items-center justify-center hover:bg-white active:scale-95 transition-all pointer-events-auto border border-gray-100">
-                <i class="ph ph-caret-left text-2xl"></i>
-            </button>
-            
-            <!-- Screenshot Button -->
-            <button id="screenshot-btn" class="bg-white/90 backdrop-blur-md w-12 h-12 rounded-full shadow-md text-gray-700 flex items-center justify-center hover:text-blue-600 hover:bg-white active:scale-95 transition-all pointer-events-auto border border-gray-100 group" aria-label="Take Screenshot">
-                <i class="ph ph-camera text-2xl group-hover:scale-110 transition-transform"></i>
-            </button>
-        </div>
+function openViewer(m){
+  viewerTitle.textContent = m.name;
+  mv.setAttribute("alt", m.name);
+  mv.setAttribute("src", FOLDER + m.file);
+  if (m.ios) mv.setAttribute("ios-src", FOLDER + m.ios);
+  else       mv.removeAttribute("ios-src");
 
-        <!-- 
-            Model Viewer Configuration:
-            - ar-modes: "scene-viewer" (Android preferred), "webxr" (Android fallback), "quick-look" (iOS native)
-        -->
-        <model-viewer 
-            id="main-viewer"
-            src=""
-            ios-src=""
-            alt="3D Model"
-            ar
-            ar-modes="scene-viewer webxr quick-look"
-            camera-controls
-            auto-rotate
-            rotation-per-second="30deg"
-            shadow-intensity="1.5"
-            shadow-softness="0.7"
-            environment-image="neutral"
-            exposure="1.0">
-            
-            <!-- Custom AR Button placed in the designated slot -->
-            <button slot="ar-button" id="custom-ar-button">
-                <i class="ph ph-bounding-box text-2xl"></i>
-                Open in AR
-            </button>
-        </model-viewer>
-    </div>
+  viewer.classList.add("open");
+  document.body.style.overflow = "hidden";
 
-    <!-- Custom Toast Message -->
-    <div id="toast-message" class="fixed top-20 left-1/2 transform -translate-x-1/2 -translate-y-8 opacity-0 transition-all duration-300 pointer-events-none z-[60]">
-        <div class="bg-gray-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm font-medium">
-            <i id="toast-icon" class="ph ph-check-circle text-green-400 text-lg"></i>
-            <span id="toast-text">Screenshot saved!</span>
-        </div>
-    </div>
+  // reset camera each time
+  mv.cameraOrbit = "20deg 75deg auto";
+  mv.fieldOfView = "auto";
+  try { mv.resetTurntableRotation(0); } catch(e){}
 
-    <script>
-        // Model Data
-        const modelData = {
-            'Astronaut': {
-                glb: 'https://tcsion.com/per/g01/pub/1016/iDH/webpresence/extractedtemplates/wp_static_content/Ed_Games/AR_Project/3D_models/Cheetah.glb',
-                usdz: 'https://modelviewer.dev/shared-assets/models/Astronaut.usdz'
-            },
-            'Shoe': {
-                glb: 'https://modelviewer.dev/shared-assets/models/Shoe.glb',
-                usdz: 'https://modelviewer.dev/shared-assets/models/Shoe.usdz'
-            }
-        };
+  // history entry so the hardware/gesture back button returns to the grid
+  if (location.hash !== "#view") history.pushState({view:true}, "", "#view");
 
-        // Elements
-        const viewerModal = document.getElementById('viewer-modal');
-        const mainViewer = document.getElementById('main-viewer');
-        const screenshotBtn = document.getElementById('screenshot-btn');
-        
-        // Toast Elements
-        const toast = document.getElementById('toast-message');
-        const toastText = document.getElementById('toast-text');
-        const toastIcon = document.getElementById('toast-icon');
-        let toastTimeout;
+  // request real fullscreen where supported (Android/desktop; iOS ignores it)
+  const el = viewer;
+  if (el.requestFullscreen)      el.requestFullscreen().catch(()=>{});
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+}
 
-        // Function to open the 3D Modal
-        window.openModel = function(modelKey) {
-            const data = modelData[modelKey];
-            if(data) {
-                // Set sources
-                mainViewer.src = data.glb;
-                mainViewer.iosSrc = data.glb;
-                
-                // Show modal
-                viewerModal.classList.remove('hidden');
-                viewerModal.classList.add('flex');
-            }
-        };
+function closeViewer(fromPop){
+  viewer.classList.remove("open");
+  document.body.style.overflow = "";
+  mv.removeAttribute("src");                 // free GPU memory
+  if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+  else if (document.webkitFullscreenElement) document.webkitExitFullscreen();
+  if (!fromPop && location.hash === "#view") history.back();
+}
 
-        // Function to close the 3D Modal
-        window.closeModel = function() {
-            viewerModal.classList.remove('flex');
-            viewerModal.classList.add('hidden');
-            
-            // Clear source to stop rendering in background
-            mainViewer.src = '';
-            mainViewer.iosSrc = '';
-        };
+closeBtn.addEventListener("click", () => closeViewer(false));
 
-        // Custom Toast Notification Function
-        const showToast = (message, isError = false) => {
-            toastText.textContent = message;
-            
-            if (isError) {
-                toastIcon.className = 'ph ph-warning-circle text-red-400 text-lg';
-            } else {
-                toastIcon.className = 'ph ph-check-circle text-green-400 text-lg';
-            }
+window.addEventListener("popstate", () => {
+  if (viewer.classList.contains("open")) closeViewer(true);
+});
 
-            toast.classList.remove('opacity-0', '-translate-y-8');
-            toast.classList.add('opacity-100', 'translate-y-0');
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && viewer.classList.contains("open")) closeViewer(false);
+});
 
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', '-translate-y-8');
-            }, 3000);
-        };
-
-        // Stop auto-rotation when the user interacts with the model
-        mainViewer.addEventListener('camera-change', (event) => {
-            if (event.detail.source === 'user-interaction') {
-                mainViewer.removeAttribute('auto-rotate');
-            }
-        });
-
-        // Screenshot Functionality
-        screenshotBtn.addEventListener('click', async () => {
-            try {
-                const wasAutoRotating = mainViewer.hasAttribute('auto-rotate');
-                if (wasAutoRotating) mainViewer.removeAttribute('auto-rotate');
-
-                // Visual flash effect
-                const flash = document.createElement('div');
-                flash.className = 'fixed inset-0 bg-white z-[100] transition-opacity duration-300 opacity-100 pointer-events-none';
-                document.body.appendChild(flash);
-                
-                // Get image blob
-                const blob = await mainViewer.toBlob({ idealAspect: true });
-                if (!blob) throw new Error("Failed to generate image data");
-
-                // Download image
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `3D-Capture-${new Date().getTime()}.png`;
-                
-                document.body.appendChild(link);
-                link.click();
-                
-                // Cleanup
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-                
-                // Remove flash
-                requestAnimationFrame(() => {
-                    flash.classList.remove('opacity-100');
-                    flash.classList.add('opacity-0');
-                    setTimeout(() => document.body.removeChild(flash), 300);
-                });
-                
-                showToast("Screenshot saved to device!");
-                
-                if (wasAutoRotating) mainViewer.setAttribute('auto-rotate', 'true');
-
-            } catch (error) {
-                console.error('Screenshot failed:', error);
-                showToast("Couldn't capture screenshot", true);
-            }
-        });
-    </script>
+/* Hide the AR button on devices that cannot do AR (e.g. desktop) */
+mv.addEventListener("load", () => {
+  arBtn.hidden = !mv.canActivateAR;
+});
+</script>
 </body>
 </html>
