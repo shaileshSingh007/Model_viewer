@@ -259,6 +259,7 @@
 <div class="viewer" id="viewer">
   <div class="title-pill" id="viewerTitle">Model</div>
   <button class="close-btn" id="closeBtn" aria-label="Close viewer">✕</button>
+  <button class="close-btn" id="captureBtn" aria-label="Take Photo" style="right: 74px; font-size: 20px;">📷</button>
   <div class="hint">Drag to rotate · Pinch to zoom</div>
   <model-viewer
       id="mv"
@@ -271,8 +272,8 @@
       exposure="1"
       environment-image="neutral"
       ar
-      ar-modes="webxr scene-viewer quick-look"
-      ar-scale="auto"
+      ar-modes="scene-viewer quick-look webxr"
+      ar-scale="fixed"
       ar-placement="floor"
       loading="eager"
       reveal="auto">
