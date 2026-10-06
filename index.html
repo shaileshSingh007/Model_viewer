@@ -293,30 +293,28 @@
 
 <script>
 /* =========================================================
-   1) MODEL LIST  —  edit this array to match your /model folder
-   file : filename inside the "model" folder
-   name : label shown on the card
-   ios  : (optional) matching .usdz file for iOS Quick Look.
-          If omitted, model-viewer auto-generates USDZ from the GLB.
+   1) MODEL LIST 
+   Models are now loaded directly from the root folder.
+   The .glb extension is appended to the animal's name automatically.
    ========================================================= */
 const MODELS = [
-  { file:"models/WhiteRhinoceros.glb", name:"WhiteRhinoceros" },
-  { file:"models/Giraffe.glb",         name:"Giraffe" },
-  { file:"models/Hippopotamus.glb",    name:"Hippopotamus" },
-  { file:"models/Wildebeest.glb",      name:"Wildebeest" },
-  { file:"models/Elephant.glb",        name:"Elephant" },
-  { file:"models/Zebra.glb",           name:"Zebra" },
-  { file:"models/Lion.glb",            name:"Lion" },
-  { file:"models/Buffalo.glb",         name:"Buffalo" }
+  { name: "WhiteRhinoceros" },
+  { name: "Giraffe" },
+  { name: "Hippopotamus" },
+  { name: "Wildebeest" },
+  { name: "Elephant" },
+  { name: "Zebra" },
+  { name: "Lion" },
+  { name: "Buffalo" }
 ];
-
-const FOLDER = "model/";     // folder that contains the .glb files
 
 /* ---------- Build the grid ---------- */
 const grid = document.getElementById("grid");
 
-MODELS.forEach((m, i) => {
-  const src = FOLDER + m.file;
+MODELS.forEach((m) => {
+  // Model file is named exactly the same as the animal name + .glb, loaded from root
+  const src = `${m.name}.glb`; 
+  
   const card = document.createElement("button");
   card.className = "card";
   card.type = "button";
@@ -338,11 +336,14 @@ MODELS.forEach((m, i) => {
         environment-image="neutral"></model-viewer>
     </div>
     <h3>${m.name}</h3>`;
+    
   const tmv = card.querySelector("model-viewer");
   const spin = card.querySelector(".spin");
+  
   tmv.addEventListener("load", () => spin.remove());
   tmv.addEventListener("error", () => spin.textContent = "3D");
   card.addEventListener("click", () => openViewer(m));
+  
   grid.appendChild(card);
 });
 
@@ -354,11 +355,15 @@ const closeBtn    = document.getElementById("closeBtn");
 const arBtn       = document.getElementById("arBtn");
 
 function openViewer(m){
+  const src = `${m.name}.glb`;
+  
   viewerTitle.textContent = m.name;
   mv.setAttribute("alt", m.name);
-  mv.setAttribute("src", FOLDER + m.file);
-  if (m.ios) mv.setAttribute("ios-src", FOLDER + m.ios);
-  else       mv.removeAttribute("ios-src");
+  mv.setAttribute("src", src); // Load from root
+  
+  // Optional: Auto-generate an iOS Quick Look filename if a matching .usdz is also in root
+  // mv.setAttribute("ios-src", `${m.name}.usdz`); 
+  mv.removeAttribute("ios-src");
 
   viewer.classList.add("open");
   document.body.style.overflow = "hidden";
