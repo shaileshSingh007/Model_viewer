@@ -353,6 +353,49 @@ const mv          = document.getElementById("mv");
 const viewerTitle = document.getElementById("viewerTitle");
 const closeBtn    = document.getElementById("closeBtn");
 const arBtn       = document.getElementById("arBtn");
+const captureBtn  = document.getElementById("captureBtn"); // Get the new button
+
+captureBtn.addEventListener('click', async () => {
+  try {
+    // Generate a blob from the model-viewer
+    const blob = await mv.toBlob({ idealAspect: true });
+    
+    // Create a temporary URL for the blob
+    const url = URL.createObjectURL(blob);
+    
+    // Create a hidden anchor element to trigger the download
+    const a = document.createElement('a');
+    a.href = url;
+    
+    // Use the model name + timestamp for the filename
+    const currentName = mv.getAttribute('alt') || 'Model';
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    a.download = `${currentName}_capture_${timestamp}.png`;
+    
+    // Append, click, and cleanup
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    // Provide some visual feedback (optional flash effect)
+    const flash = document.createElement('div');
+    flash.style.position = 'absolute';
+    flash.style.inset = '0';
+    flash.style.backgroundColor = 'white';
+    flash.style.zIndex = '99999';
+    flash.style.transition = 'opacity 0.3s';
+    viewer.appendChild(flash);
+    
+    setTimeout(() => {
+      flash.style.opacity = '0';
+      setTimeout(() => flash.remove(), 300);
+    }, 50);
+
+  } catch (error) {
+    console.error("Failed to capture screenshot:", error);
+  }
+});
 
 function openViewer(m){
   const src = `${m.name}.glb`;
